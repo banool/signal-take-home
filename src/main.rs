@@ -1,6 +1,6 @@
 use hyper::service::{make_service_fn, service_fn};
-use hyper::{Body, Client, Request, Response, Server, StatusCode, Uri};
-use log::{debug, error, info};
+use hyper::{Body, Client, Method, Request, Response, Server, StatusCode, Uri};
+use log::{debug, error, info, warn};
 use std::convert::Infallible;
 use std::net::{IpAddr, SocketAddr};
 use structopt::{self, StructOpt};
@@ -53,9 +53,18 @@ async fn main() {
     }
 }
 
-async fn proxy(_client: HttpClient, _req: Request<Body>) -> Result<Response<Body>, hyper::Error> {
-    // Just return 404 for now.
-    let mut not_found = Response::default();
-    *not_found.status_mut() = StatusCode::NOT_FOUND;
-    Ok(not_found)
+async fn proxy(_client: HttpClient, req: Request<Body>) -> Result<Response<Body>, hyper::Error> {
+    // If the request is not a CONNECT request, return 501.
+    if req.method() != Method::CONNECT {
+        let mut response = Response::default();
+        *response.status_mut() = StatusCode::NOT_IMPLEMENTED;
+        warn!(
+            "Rejected request for {} with method {} (should be CONNECT)",
+            req.uri(),
+            req.method()
+        );
+        return Ok(response);
+    }
+
+    Ok(Response::default())
 }
