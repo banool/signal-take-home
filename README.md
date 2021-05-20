@@ -62,3 +62,24 @@ Run it like this:
 ```
 docker run -p 8888:8888 -it --init signal-take-home
 ```
+
+## Deployment
+
+I have deployed this for real on my local server using Github Actions on this repo to get the image to build continuously and my existing automated server management setup at [banool/server-setup](https://github.com/banool/server-setup) (ansible, systemd, etc). See [this commit](https://github.com/banool/server-setup/commit/82ba95e514de34948245016bd74c4c8bf514cc23). I ran the following command to execute the setup:
+
+```
+ansible-playbook -i hosts everything.yaml --extra-vars "@vars.json" --extra-vars='ansible_become_pass=<fakepassword>' --tags signal,nginx,https
+```
+
+This just all runs on my own little friend at home, running CentOS 8.
+
+You can query it for real like this:
+```
+curl -x dport.me "https://api.giphy.com/v1/gifs/search?api_key=$giphy_api_key&q=happy&limit=2" | jq .
+```
+
+## Extension ideas
+
+- A neato extension to work on would be the padding stuff Signal does for real as described here: https://signal.org/blog/signal-and-giphy-update/. This isn't really in the domain of this proxy service however, but more on the client side, so it is a bit out of scope for here.
+- It'd be cool to try and spin up a bunch of these with Kubernetes or something similar. It'd be pretty straightforward since the service is stateless.
+- It'd be good to serve the actual functionality out of a specific endpoint and return a "Sorry, you're looking in the wrong spot" page for the root endpoint.
