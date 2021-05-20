@@ -6,6 +6,7 @@ use log::{debug, info, warn};
 use std::convert::Infallible;
 use std::net::{IpAddr, SocketAddr};
 use structopt::{self, StructOpt};
+use tokio::net::TcpStream;
 
 #[derive(Debug, StructOpt)]
 pub struct Args {
@@ -106,6 +107,18 @@ async fn proxy(
     Ok(Response::new(Body::empty()))
 }
 
-async fn tunnel(_upgraded: Upgraded, _addr: String) -> std::io::Result<()> {
+async fn tunnel(mut upgraded: Upgraded, addr: String) -> std::io::Result<()> {
+    // Connect to remote server now that all the validation is done.
+    let mut server = TcpStream::connect(addr).await?;
+
+    // Proxy data.
+    let (from_client, from_server) =
+        tokio::io::copy_bidirectional(&mut upgraded, &mut server).await?;
+
+    debug!(
+        "Client wrote {} bytes and received {} bytes",
+        from_client, from_server
+    );
+
     Ok(())
 }
