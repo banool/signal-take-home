@@ -19,3 +19,13 @@ To run the server, try something like this:
 ```
 RUST_LOG=debug cargo run -- --address 127.0.0.1 -p 8888 --allowed-providers api.giphy.com
 ```
+
+To make a valid query through the proxy, run the following:
+```
+curl -x localhost:8888 "https://api.giphy.com/v1/gifs/search?api_key=$giphy_api_key&q=happy&limit=1" | jq .
+```
+
+To test an invalid query, just this works (this sends a GET directly to the proxy, instead of a CONNECT through it for GIPHY):
+```
+curl localhost:8888
+```
