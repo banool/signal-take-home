@@ -1,0 +1,22 @@
+name: Build server image
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build_server:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@main
+    - name: Build and publish signal-take-home to Github Packages
+      uses: docker/build-push-action@v1
+      with:
+        repository: banool/signal-take-home/signal-take-home
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+        registry: docker.pkg.github.com
+        tags: latest
+        always_pull: true
