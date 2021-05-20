@@ -1,4 +1,5 @@
 use hyper::Uri;
+use log::debug;
 use std::net::IpAddr;
 use structopt::{self, StructOpt};
 
@@ -17,10 +18,11 @@ pub struct Args {
     allowed_providers: Vec<Uri>,
 }
 
-
 #[tokio::main]
 async fn main() {
+    env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("info")).init();
+
     let args = Args::from_args();
 
-    println!("args: {:#?}", args);
+    debug!("args: {:#?}", args);
 }

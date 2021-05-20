@@ -11,5 +11,5 @@ cargo check
 
 To run the server, try something like this:
 ```
-cargo run -- --address 127.0.0.1 -p 8888 --allowed-providers api.giphy.com
+RUST_LOG=debug cargo run -- --address 127.0.0.1 -p 8888 --allowed-providers api.giphy.com
 ```
