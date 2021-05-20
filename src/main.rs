@@ -1,5 +1,6 @@
 use anyhow::{bail, Error, Result};
 use hyper::service::{make_service_fn, service_fn};
+use hyper::upgrade::Upgraded;
 use hyper::{Body, Method, Request, Response, Server, StatusCode, Uri};
 use log::{debug, info, warn};
 use std::convert::Infallible;
@@ -68,7 +69,7 @@ async fn proxy(
         return Ok(response);
     }
 
-    let (_authority, host) = match req.uri().authority() {
+    let (authority, host) = match req.uri().authority() {
         Some(authority) => (authority.to_string(), authority.host().to_string()),
         None => {
             let mut response = Response::default();
@@ -91,5 +92,20 @@ async fn proxy(
         return Ok(response);
     }
 
-    Ok(Response::default())
+    tokio::task::spawn(async move {
+        match hyper::upgrade::on(req).await {
+            Ok(upgraded) => {
+                if let Err(e) = tunnel(upgraded, authority).await {
+                    warn!("Server IO error: {}", e);
+                };
+            }
+            Err(e) => warn!("Upgrade error: {}", e),
+        }
+    });
+
+    Ok(Response::new(Body::empty()))
+}
+
+async fn tunnel(_upgraded: Upgraded, _addr: String) -> std::io::Result<()> {
+    Ok(())
 }
