@@ -51,3 +51,14 @@ curl: (56) Received HTTP code 400 from proxy after CONNECT
 # Server logs
 [2021-05-20T21:33:35Z WARN  signal_take_home] Rejected request for google.com which is not in the list of allowed providers
 ```
+
+## Production
+Build the image like this:
+```
+docker build -t signal-take-home .
+```
+
+Run it like this:
+```
+docker run -p 8888:8888 -it --init signal-take-home
+```
